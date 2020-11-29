@@ -17,57 +17,87 @@ def homepage():
 @app.route('/froyo')
 def choose_froyo():
     """Shows a form to collect the user's Fro-Yo order."""
-    pass
+    return render_template('froyo_form.html')
 
 @app.route('/froyo_results')
 def show_froyo_results():
-    """Shows the user what they ordered from the previous page."""
-    pass
+    context = {
+    'users_froyo_flavor' : request.args.get('flavor'),
+    'users_froyo_toppings' : request.args.get('toppings')
+    }
+
+    return render_template('froyo_results.html', **context)
+    
 
 @app.route('/favorites')
 def favorites():
-    """Shows the user a form to choose their favorite color, animal, and city."""
-    pass
-
-@app.route('/favorites_results')
-def favorites_results():
-    """Shows the user a nice message using their form results."""
-    pass
-
-@app.route('/secret_message')
-def secret_message():
-    """Shows the user a form to collect a secret message. Sends the result via
-    the POST method to keep it a secret!"""
-    pass
-
-@app.route('/message_results', methods=['POST'])
-def message_results():
-    """Shows the user their message, with the letters in sorted order."""
-    pass
-
-@app.route('/calculator')
-def calculator():
-    """Shows the user a form to enter 2 numbers and an operation."""
     return """
-    <form action="/calculator_results" method="GET">
-        Please enter 2 numbers and select an operator.<br/><br/>
-        <input type="number" name="operand1">
-        <select name="operation">
-            <option value="add">+</option>
-            <option value="subtract">-</option>
-            <option value="multiply">*</option>
-            <option value="divide">/</option>
-        </select>
-        <input type="number" name="operand2">
+    <form action="/favorites_results" method="GET">
+        What is your favorite color? <br/>
+        <input type="text" name="color"><br/>
+        What is your favorite animal? <br/>
+        <input type="text" name="animal"><br/>
+        What is your favorite city? <br/>
+        <input type="text" name="city"><br/>
         <input type="submit" value="Submit!">
     </form>
     """
 
+@app.route('/favorites_results')
+def favorites_results():
+    users_color = request.args.get('color')
+    users_animal = request.args.get('animal')
+    users_city = request.args.get('city')
+    return f"Wow, I didn't know {users_color} {users_animal}s lived in {users_city}!"
+
+@app.route('/secret_message')
+def secret_message():
+    return """
+    <form action="/message_results" method="POST">
+        What is your secret message? <br/>
+        <input type="text" name="message"><br/>
+        <input type="submit" value="Submit!">
+    </form>
+    """
+
+@app.route('/message_results', methods=['POST'])
+def message_results():
+    users_message = sort_letters(request.form.get('message'))
+    return f"""
+    Here's your secret message!
+    {users_message}
+    """
+
+@app.route('/calculator')
+def calculator():
+    """Shows the user a form to enter 2 numbers and an operation."""
+    return render_template('calculator_form.html')
+
 @app.route('/calculator_results')
 def calculator_results():
-    """Shows the user the result of their calculation."""
-    pass
+    number1 = int(request.args.get('operand1'))
+    operator = request.args.get('operation')
+    number2 = int(request.args.get('operand2'))
+    result = 0
+    if operator == "add":
+        result = number1 + number2
+    elif operator == "subtract":
+        result = number1 - number2
+    elif operator == "multiply":
+        result = number1 * number2
+    elif operator == "divide":
+        result = number1 / number2
+    
+    context = {
+    'number1': number1,
+    'operator': operator,
+    'number2': number2,
+    'result': result
+    }
 
+    return render_template('calculator_results.html', **context)
+
+    
 
 # List of compliments to be used in the `compliments_results` route (feel free 
 # to add your own!) 
